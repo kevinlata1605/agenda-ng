@@ -2676,12 +2676,22 @@
             body: { prueba: true },
           });
           b.removeAttribute("aria-busy");
-          if (error)
-            aviso(
-              'No se pudo enviar la prueba. Revisa que la función "avisos" esté instalada.',
-              true,
-            );
-          else if (!data || !data.enviados)
+          if (error) {
+            let detalle = error.message || String(error);
+            try {
+              if (error.context && typeof error.context.text === "function") {
+                detalle =
+                  "código " +
+                  error.context.status +
+                  ": " +
+                  (await error.context.text()).slice(0, 200);
+              }
+            } catch (_) {
+              /* sin detalle */
+            }
+            mostrarError("No se pudo enviar la prueba (" + detalle + ").");
+            return;
+          } else if (!data || !data.enviados)
             aviso("No hay celulares activados para recibir avisos.", true);
           else aviso("Prueba enviada. Debe llegarte en unos segundos.");
         };
